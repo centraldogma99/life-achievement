@@ -1,17 +1,16 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, X, Star, Sparkles } from 'lucide-react';
-import type { Achievement } from '../types';
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, X, Star, Sparkles } from "lucide-react";
+import type { Achievement } from "../types";
 
 interface AchievementNotificationProps {
   achievements: Achievement[];
   onClose: (achievementId: string) => void;
 }
 
-export const AchievementNotification: React.FC<AchievementNotificationProps> = ({
-  achievements,
-  onClose
-}) => {
+export const AchievementNotification: React.FC<
+  AchievementNotificationProps
+> = ({ achievements, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -23,11 +22,11 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
       // 각 알림을 4초간 표시 후 자동 닫기
       const timer = setTimeout(() => {
         if (currentIndex < achievements.length - 1) {
-          setCurrentIndex(prev => prev + 1);
+          setCurrentIndex((prev) => prev + 1);
         } else {
           setIsVisible(false);
           setTimeout(() => {
-            achievements.forEach(achievement => onClose(achievement.id));
+            achievements.forEach((achievement) => onClose(achievement.id));
           }, 500);
         }
       }, 4000);
@@ -42,29 +41,29 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
 
   const rarityConfig = {
     common: {
-      bgColor: 'from-gray-100 to-gray-200',
-      borderColor: 'border-gray-300',
-      textColor: 'text-gray-800',
-      accentColor: 'text-gray-600'
+      bgColor: "from-gray-100 to-gray-200",
+      borderColor: "border-gray-300",
+      textColor: "text-gray-800",
+      accentColor: "text-gray-600",
     },
     rare: {
-      bgColor: 'from-blue-100 to-blue-200',
-      borderColor: 'border-blue-300',
-      textColor: 'text-blue-900',
-      accentColor: 'text-blue-600'
+      bgColor: "from-blue-100 to-blue-200",
+      borderColor: "border-blue-300",
+      textColor: "text-blue-900",
+      accentColor: "text-blue-600",
     },
     epic: {
-      bgColor: 'from-purple-100 to-purple-200',
-      borderColor: 'border-purple-300',
-      textColor: 'text-purple-900',
-      accentColor: 'text-purple-600'
+      bgColor: "from-purple-100 to-purple-200",
+      borderColor: "border-purple-300",
+      textColor: "text-purple-900",
+      accentColor: "text-purple-600",
     },
     legendary: {
-      bgColor: 'from-yellow-100 to-yellow-200',
-      borderColor: 'border-yellow-300',
-      textColor: 'text-yellow-900',
-      accentColor: 'text-yellow-600'
-    }
+      bgColor: "from-yellow-100 to-yellow-200",
+      borderColor: "border-yellow-300",
+      textColor: "text-yellow-900",
+      accentColor: "text-yellow-600",
+    },
   };
 
   const config = rarityConfig[currentAchievement.rarity];
@@ -91,8 +90,8 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
             <div className="absolute inset-0 rounded-xl overflow-hidden">
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20"
-                initial={{ x: '-100%' }}
-                animate={{ x: '100%' }}
+                initial={{ x: "-100%" }}
+                animate={{ x: "100%" }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
               />
             </div>
@@ -116,16 +115,16 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
                 transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
               >
                 <Trophy className="w-6 h-6" />
-                
+
                 {/* 반짝이는 효과 */}
                 <motion.div
                   className="absolute inset-0 rounded-full"
-                  animate={{ 
+                  animate={{
                     boxShadow: [
-                      '0 0 0 0 rgba(255, 215, 0, 0.7)',
-                      '0 0 0 10px rgba(255, 215, 0, 0)',
-                      '0 0 0 0 rgba(255, 215, 0, 0)'
-                    ]
+                      "0 0 0 0 rgba(255, 215, 0, 0.7)",
+                      "0 0 0 10px rgba(255, 215, 0, 0)",
+                      "0 0 0 0 rgba(255, 215, 0, 0)",
+                    ],
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
@@ -136,14 +135,16 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
                   <h3 className={`font-bold text-lg ${config.textColor}`}>
                     업적 달성!
                   </h3>
-                  {currentAchievement.rarity !== 'common' && (
+                  {currentAchievement.rarity !== "common" && (
                     <div className="flex items-center gap-1">
-                      {currentAchievement.rarity === 'legendary' ? (
+                      {currentAchievement.rarity === "legendary" ? (
                         <Star className={`w-4 h-4 ${config.accentColor}`} />
                       ) : (
                         <Sparkles className={`w-4 h-4 ${config.accentColor}`} />
                       )}
-                      <span className={`text-xs font-medium uppercase ${config.accentColor}`}>
+                      <span
+                        className={`text-xs font-medium uppercase ${config.accentColor}`}
+                      >
                         {currentAchievement.rarity}
                       </span>
                     </div>
@@ -171,8 +172,13 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
 
               {/* 달성 일시 */}
               {currentAchievement.unlockedAt && (
-                <div className={`text-xs ${config.accentColor} pt-2 border-t border-current/20`}>
-                  달성 시간: {new Date(currentAchievement.unlockedAt).toLocaleString('ko-KR')}
+                <div
+                  className={`text-xs ${config.accentColor} pt-2 border-t border-current/20`}
+                >
+                  달성 시간:{" "}
+                  {new Date(currentAchievement.unlockedAt).toLocaleString(
+                    "ko-KR",
+                  )}
                 </div>
               )}
             </div>
@@ -188,7 +194,9 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
                     <div
                       key={index}
                       className={`h-1 rounded-full flex-1 ${
-                        index === currentIndex ? 'bg-current opacity-80' : 'bg-current opacity-20'
+                        index === currentIndex
+                          ? "bg-current opacity-80"
+                          : "bg-current opacity-20"
                       }`}
                     />
                   ))}
@@ -206,18 +214,18 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
                     x: 50,
                     y: 50,
                     scale: 0,
-                    opacity: 1
+                    opacity: 1,
                   }}
                   animate={{
                     x: Math.random() * 200 - 100,
                     y: Math.random() * 200 - 100,
                     scale: [0, 1, 0],
-                    opacity: [1, 1, 0]
+                    opacity: [1, 1, 0],
                   }}
                   transition={{
                     duration: 3,
                     delay: i * 0.2,
-                    ease: "easeOut"
+                    ease: "easeOut",
                   }}
                 />
               ))}
@@ -227,4 +235,4 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
       )}
     </AnimatePresence>
   );
-}; 
+};

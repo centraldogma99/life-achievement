@@ -1,23 +1,33 @@
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Search, Trophy, Lock, Sparkles } from 'lucide-react';
-import type { Achievement } from '../types';
-import { AchievementCard } from './AchievementCard';
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Filter, Search, Trophy, Lock, Sparkles } from "lucide-react";
+import type { Achievement } from "../types";
+import { AchievementCard } from "./AchievementCard";
 
 interface AchievementListProps {
   achievements: Achievement[];
 }
 
-type FilterType = 'all' | 'unlocked' | 'locked' | 'exercise' | 'reading' | 'lifestyle' | 'productivity' | 'health';
+type FilterType =
+  | "all"
+  | "unlocked"
+  | "locked"
+  | "exercise"
+  | "reading"
+  | "lifestyle"
+  | "productivity"
+  | "health";
 
-export const AchievementList: React.FC<AchievementListProps> = ({ achievements }) => {
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+export const AchievementList: React.FC<AchievementListProps> = ({
+  achievements,
+}) => {
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // 통계 계산
   const stats = useMemo(() => {
     const total = achievements.length;
-    const unlocked = achievements.filter(a => a.isUnlocked).length;
+    const unlocked = achievements.filter((a) => a.isUnlocked).length;
     const completion = total > 0 ? Math.round((unlocked / total) * 100) : 0;
 
     return { total, unlocked, completion };
@@ -28,20 +38,21 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
     let filtered = achievements;
 
     // 상태 필터
-    if (filter === 'unlocked') {
-      filtered = filtered.filter(a => a.isUnlocked);
-    } else if (filter === 'locked') {
-      filtered = filtered.filter(a => !a.isUnlocked);
-    } else if (filter !== 'all') {
-      filtered = filtered.filter(a => a.category === filter);
+    if (filter === "unlocked") {
+      filtered = filtered.filter((a) => a.isUnlocked);
+    } else if (filter === "locked") {
+      filtered = filtered.filter((a) => !a.isUnlocked);
+    } else if (filter !== "all") {
+      filtered = filtered.filter((a) => a.category === filter);
     }
 
     // 검색 필터
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(a => 
-        a.name.toLowerCase().includes(term) ||
-        a.description.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (a) =>
+          a.name.toLowerCase().includes(term) ||
+          a.description.toLowerCase().includes(term),
       );
     }
 
@@ -49,14 +60,14 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
   }, [achievements, filter, searchTerm]);
 
   const filterOptions = [
-    { value: 'all' as const, label: '전체', icon: Sparkles },
-    { value: 'unlocked' as const, label: '달성됨', icon: Trophy },
-    { value: 'locked' as const, label: '미달성', icon: Lock },
-    { value: 'exercise' as const, label: '운동', icon: null },
-    { value: 'reading' as const, label: '독서', icon: null },
-    { value: 'lifestyle' as const, label: '생활', icon: null },
-    { value: 'productivity' as const, label: '생산성', icon: null },
-    { value: 'health' as const, label: '건강', icon: null },
+    { value: "all" as const, label: "전체", icon: Sparkles },
+    { value: "unlocked" as const, label: "달성됨", icon: Trophy },
+    { value: "locked" as const, label: "미달성", icon: Lock },
+    { value: "exercise" as const, label: "운동", icon: null },
+    { value: "reading" as const, label: "독서", icon: null },
+    { value: "lifestyle" as const, label: "생활", icon: null },
+    { value: "productivity" as const, label: "생산성", icon: null },
+    { value: "health" as const, label: "건강", icon: null },
   ];
 
   return (
@@ -67,21 +78,29 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
           <h2 className="text-2xl font-bold text-gray-900">업적 현황</h2>
           <div className="flex items-center gap-2 text-blue-600">
             <Trophy className="w-5 h-5" />
-            <span className="font-semibold">{stats.unlocked} / {stats.total}</span>
+            <span className="font-semibold">
+              {stats.unlocked} / {stats.total}
+            </span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.total}
+            </div>
             <div className="text-sm text-gray-600">전체 업적</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.unlocked}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.unlocked}
+            </div>
             <div className="text-sm text-gray-600">달성한 업적</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.completion}%</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {stats.completion}%
+            </div>
             <div className="text-sm text-gray-600">달성률</div>
           </div>
         </div>
@@ -89,8 +108,12 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
         {/* 전체 진행률 바 */}
         <div className="bg-white rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">전체 진행률</span>
-            <span className="text-sm font-medium text-gray-900">{stats.completion}%</span>
+            <span className="text-sm font-medium text-gray-700">
+              전체 진행률
+            </span>
+            <span className="text-sm font-medium text-gray-900">
+              {stats.completion}%
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <motion.div
@@ -128,9 +151,10 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
                   onClick={() => setFilter(option.value)}
                   className={`
                     inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${filter === option.value
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ${
+                      filter === option.value
+                        ? "bg-blue-100 text-blue-700 border border-blue-200"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }
                   `}
                 >
@@ -160,8 +184,8 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {filteredAchievements.map((achievement) => (
-            <AchievementCard 
-              key={achievement.id} 
+            <AchievementCard
+              key={achievement.id}
               achievement={achievement}
               showProgress={!achievement.isUnlocked}
             />
@@ -180,11 +204,9 @@ export const AchievementList: React.FC<AchievementListProps> = ({ achievements }
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             검색 결과가 없습니다
           </h3>
-          <p className="text-gray-600">
-            다른 검색어나 필터를 시도해보세요.
-          </p>
+          <p className="text-gray-600">다른 검색어나 필터를 시도해보세요.</p>
         </motion.div>
       )}
     </div>
   );
-}; 
+};

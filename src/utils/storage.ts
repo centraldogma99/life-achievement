@@ -1,10 +1,10 @@
-import type { Achievement, DiaryEntry, UserProgress } from '../types';
-import { defaultAchievements } from '../data/achievements';
+import type { Achievement, DiaryEntry, UserProgress } from "../types";
+import { defaultAchievements } from "../data/achievements";
 
 const STORAGE_KEYS = {
-  ACHIEVEMENTS: 'life-achievements',
-  DIARY_ENTRIES: 'diary-entries',
-  USER_PROGRESS: 'user-progress'
+  ACHIEVEMENTS: "life-achievements",
+  DIARY_ENTRIES: "diary-entries",
+  USER_PROGRESS: "user-progress",
 } as const;
 
 // 업적 데이터 관리
@@ -19,29 +19,31 @@ export const loadAchievements = (): Achievement[] => {
     saveAchievements(defaultAchievements);
     return defaultAchievements;
   }
-  
+
   try {
     const parsed = JSON.parse(stored);
     // 새로운 업적이 추가되었을 경우 병합
     return mergeWithDefaultAchievements(parsed);
   } catch (error) {
-    console.error('Failed to parse achievements from localStorage:', error);
+    console.error("Failed to parse achievements from localStorage:", error);
     return defaultAchievements;
   }
 };
 
 // 기본 업적과 저장된 업적 병합 (새 업적 추가 대응)
-const mergeWithDefaultAchievements = (storedAchievements: Achievement[]): Achievement[] => {
+const mergeWithDefaultAchievements = (
+  storedAchievements: Achievement[],
+): Achievement[] => {
   const merged = [...defaultAchievements];
-  
+
   // 저장된 진행상황을 기본 업적에 적용
-  storedAchievements.forEach(stored => {
-    const index = merged.findIndex(def => def.id === stored.id);
+  storedAchievements.forEach((stored) => {
+    const index = merged.findIndex((def) => def.id === stored.id);
     if (index !== -1) {
       merged[index] = { ...merged[index], ...stored };
     }
   });
-  
+
   return merged;
 };
 
@@ -53,11 +55,11 @@ export const saveDiaryEntries = (entries: DiaryEntry[]): void => {
 export const loadDiaryEntries = (): DiaryEntry[] => {
   const stored = localStorage.getItem(STORAGE_KEYS.DIARY_ENTRIES);
   if (!stored) return [];
-  
+
   try {
     return JSON.parse(stored);
   } catch (error) {
-    console.error('Failed to parse diary entries from localStorage:', error);
+    console.error("Failed to parse diary entries from localStorage:", error);
     return [];
   }
 };
@@ -70,8 +72,8 @@ export const addDiaryEntry = (entry: DiaryEntry): void => {
 
 export const updateDiaryEntry = (updatedEntry: DiaryEntry): void => {
   const entries = loadDiaryEntries();
-  const index = entries.findIndex(entry => entry.id === updatedEntry.id);
-  
+  const index = entries.findIndex((entry) => entry.id === updatedEntry.id);
+
   if (index !== -1) {
     entries[index] = updatedEntry;
     saveDiaryEntries(entries);
@@ -80,7 +82,7 @@ export const updateDiaryEntry = (updatedEntry: DiaryEntry): void => {
 
 export const deleteDiaryEntry = (entryId: string): void => {
   const entries = loadDiaryEntries();
-  const filteredEntries = entries.filter(entry => entry.id !== entryId);
+  const filteredEntries = entries.filter((entry) => entry.id !== entryId);
   saveDiaryEntries(filteredEntries);
 };
 
@@ -96,50 +98,53 @@ export const loadUserProgress = (): UserProgress => {
       totalAchievements: defaultAchievements.length,
       unlockedAchievements: 0,
       currentStreak: {},
-      totalEntries: 0
+      totalEntries: 0,
     };
     saveUserProgress(initialProgress);
     return initialProgress;
   }
-  
+
   try {
     return JSON.parse(stored);
   } catch (error) {
-    console.error('Failed to parse user progress from localStorage:', error);
+    console.error("Failed to parse user progress from localStorage:", error);
     return {
       totalAchievements: defaultAchievements.length,
       unlockedAchievements: 0,
       currentStreak: {},
-      totalEntries: 0
+      totalEntries: 0,
     };
   }
 };
 
-export const updateUserProgress = (achievements: Achievement[], diaryEntries: DiaryEntry[]): void => {
-  const unlockedCount = achievements.filter(a => a.isUnlocked).length;
-  
+export const updateUserProgress = (
+  achievements: Achievement[],
+  diaryEntries: DiaryEntry[],
+): void => {
+  const unlockedCount = achievements.filter((a) => a.isUnlocked).length;
+
   // 카테고리별 연속 스트릭 계산
   const currentStreak: Record<string, number> = {};
-  achievements.forEach(achievement => {
-    if (achievement.condition.type === 'consecutive') {
+  achievements.forEach((achievement) => {
+    if (achievement.condition.type === "consecutive") {
       currentStreak[achievement.id] = achievement.progress;
     }
   });
-  
+
   const progress: UserProgress = {
     totalAchievements: achievements.length,
     unlockedAchievements: unlockedCount,
     currentStreak,
     totalEntries: diaryEntries.length,
-    lastEntryDate: diaryEntries.length > 0 ? diaryEntries[0].date : undefined
+    lastEntryDate: diaryEntries.length > 0 ? diaryEntries[0].date : undefined,
   };
-  
+
   saveUserProgress(progress);
 };
 
 // 데이터 초기화 (개발/테스트용)
 export const clearAllData = (): void => {
-  Object.values(STORAGE_KEYS).forEach(key => {
+  Object.values(STORAGE_KEYS).forEach((key) => {
     localStorage.removeItem(key);
   });
 };
@@ -150,23 +155,23 @@ export const exportData = () => {
     achievements: loadAchievements(),
     diaryEntries: loadDiaryEntries(),
     userProgress: loadUserProgress(),
-    exportDate: new Date().toISOString()
+    exportDate: new Date().toISOString(),
   };
-  
+
   return JSON.stringify(data, null, 2);
 };
 
 export const importData = (jsonString: string): boolean => {
   try {
     const data = JSON.parse(jsonString);
-    
+
     if (data.achievements) saveAchievements(data.achievements);
     if (data.diaryEntries) saveDiaryEntries(data.diaryEntries);
     if (data.userProgress) saveUserProgress(data.userProgress);
-    
+
     return true;
   } catch (error) {
-    console.error('Failed to import data:', error);
+    console.error("Failed to import data:", error);
     return false;
   }
-}; 
+};

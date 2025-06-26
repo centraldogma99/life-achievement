@@ -4,16 +4,16 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
-  category: 'exercise' | 'reading' | 'lifestyle' | 'productivity' | 'health';
+  category: "exercise" | "reading" | "lifestyle" | "productivity" | "health";
   condition: {
-    type: 'consecutive' | 'total' | 'single';
+    type: "consecutive" | "total" | "single";
     target: number;
     keywords: string[];
   };
   unlockedAt?: Date;
   isUnlocked: boolean;
   progress: number;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: "common" | "rare" | "epic" | "legendary";
 }
 
 // 일기 엔트리 타입
@@ -40,4 +40,4 @@ export interface LLMResponse {
   actions: string[];
   keywords: string[];
   confidence: number;
-} 
+}
