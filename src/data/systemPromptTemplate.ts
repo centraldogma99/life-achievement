@@ -1,4 +1,4 @@
-import { defaultAchievements } from "./achievements";
+import { defaultAchievements } from './achievements'
 
 export const systemPromptTemplate = `
 # [역할 정의]
@@ -42,4 +42,4 @@ ${defaultAchievements}
 이제 아래의 [USER_DIARY_TEXT]를 '핵심 규칙'과 '업적 목록'에 따라 분석하고, 결과를 지정된 JSON 형식으로만 반환해주십시오.
 
 [USER_DIARY_TEXT]
-`;
+`

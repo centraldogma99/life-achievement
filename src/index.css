@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* 애니메이션 */
 @keyframes fadeIn {
@@ -45,10 +45,10 @@
 }
 
 /* 폼 요소 스타일 */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
 textarea,
 select {
   appearance: none;
@@ -64,10 +64,10 @@ select {
     box-shadow 0.15s ease-in-out;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="date"]:focus,
+input[type='text']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='date']:focus,
 textarea:focus,
 select:focus {
   outline: none;
