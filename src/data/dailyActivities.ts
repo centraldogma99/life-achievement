@@ -1,4 +1,4 @@
-export const dailyAchievements = [
+export const dailyActivities = [
   {
     id: 'exercise',
     title: '운동',
@@ -32,3 +32,5 @@ export const dailyAchievements = [
     description: '자신의 방, 책상, 혹은 작업 공간을 깨끗하게 청소하거나 정리정돈 했다는 내용이 포함되어 있다.',
   },
 ] as const
+
+export type DailyActivityId = (typeof dailyActivities)[number]['id']

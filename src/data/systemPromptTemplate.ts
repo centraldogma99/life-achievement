@@ -1,4 +1,4 @@
-import { dailyAchievements } from './dailyAchievements'
+import { dailyActivities } from './dailyActivities'
 
 export const systemPromptTemplate = `
 # [역할 정의]
@@ -17,22 +17,22 @@ export const systemPromptTemplate = `
 # [업적 목록]
 아래는 분석에 사용될 업적의 목록입니다. 각 업적의 \`description\`을 기준으로 판단해주십시오.
 
-${dailyAchievements}
+${dailyActivities}
 
 # [처리 방식 예시]
--   **입력된 일기:** "오늘은 정말 정신없는 하루였다. 아침에 10분이라도 명상을 하려고 했는데, 늦잠을 자서 못했다. 대신 출근길에 어제부터 읽기 시작한 '데일 카네기 인간관계론'을 20페이지 정도 읽었다. 내일은 꼭 스쿼트 50개를 해야지. 하루를 돌아보니 바쁜 와중에도 책을 읽은 나 자신이 대견해서 감사한 마음이 든다."
+-   **입력된 일기:** "오늘은 정말 정신없는 하루였다. 아침에 10분이라도 명상을 하려고 했는데, 늦잠을 자서 못했다. 대신 출근길에 어제부터 읽기 시작한 '데일 카네기 인간관계론'을 읽었는데, 정말 인상깊었다. 내일은 꼭 스쿼트 50개를 해야지.  그리고 저녁에는 쓰레기를 치우고 너저분한 옷가지들을 정리헀다. 하루를 돌아보니 바쁜 와중에도 책을 읽은 나 자신이 대견해서 감사한 마음이 든다."
 -   **당신이 반환해야 할 이상적인 JSON 출력:**
     {
-      "achieved_list": [
+      "activities": [
         {
           "id": "reading",
           "name": "독서",
-          "reason": "카페에 가서 '데일 카네기 인간관계론'을 읽었는데,"
+          "reason": "'데일 카네기 인간관계론'을 읽었는데,"
         },
         {
-          "id": "exercise",
-          "name": "운동",
-          "reason": "하천에서 30분 정도 달리기를 했다."
+          "id": "cleaner",
+          "name": "청소 및 정리",
+          "reason": "저녁에는 쓰레기를 치우고 너저분한 옷가지들을 정리헀다."
         }
       ]
     }

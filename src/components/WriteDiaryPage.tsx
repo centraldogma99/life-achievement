@@ -3,22 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Calendar, Save, Sparkles, Loader, CheckCircle, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
-import type { DiaryEntry as DiaryEntryType, LLMResponse } from '../types'
-import { analyzeWithOpenAI } from '../utils/llm'
+import type { DiaryAnalyzeResult } from '../types'
+import { useAnalyzeWithAI } from '../utils/llm'
 
-interface DiaryEntryProps {
-  onSave: (entry: DiaryEntryType) => void
-}
-
-interface DiaryFormData {
+export interface DiaryFormData {
   content: string
   date: string
 }
 
-export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<LLMResponse['achieved_list'] | null>(null)
+export const WriteDiaryPage = ({
+  onSave,
+}: {
+  onSave: (diaryAndAnalyzeResult: DiaryFormData & DiaryAnalyzeResult) => void
+}) => {
+  const { isAnalyzing, analyze } = useAnalyzeWithAI()
   const [showSuccess, setShowSuccess] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<DiaryAnalyzeResult['activities'] | null>(
+    null,
+  )
+
+  // TODO 변경사항 없다면 analyze 하지 않도록 수정
 
   const {
     register,
@@ -38,28 +42,15 @@ export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
   const onSubmit = async (data: DiaryFormData) => {
     if (!data.content.trim()) return
 
-    setIsAnalyzing(true)
-
     try {
       // LLM을 통한 내용 분석
-      const analysis = await analyzeWithOpenAI(data.content)
+      const analysis = await analyze(data.content)
 
-      setAnalysisResult(analysis.achieved_list)
+      onSave({
+        ...data,
+        activities: analysis.activities,
+      })
 
-      // 일기 엔트리 생성
-      const entry: DiaryEntryType = {
-        id: Date.now().toString(),
-        date: data.date,
-        content: data.content,
-        extractedActions: analysis.achieved_list.map(item => item.name),
-        achievementProgress: {},
-        createdAt: new Date(),
-      }
-
-      // 부모 컴포넌트에 저장 요청
-      onSave(entry)
-
-      // 성공 상태 표시
       setShowSuccess(true)
       setTimeout(() => {
         setShowSuccess(false)
@@ -71,22 +62,17 @@ export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
       }, 2000)
     } catch (error) {
       console.error('일기 분석 중 오류 발생:', error)
-    } finally {
-      setIsAnalyzing(false)
     }
   }
 
   const previewAnalysis = async () => {
     if (!content?.trim()) return
 
-    setIsAnalyzing(true)
     try {
-      const analysis = await analyzeWithOpenAI(content)
-      setAnalysisResult(analysis.achieved_list)
+      const analysis = await analyze(content)
+      setAnalysisResult(analysis.activities)
     } catch (error) {
       console.error('미리보기 분석 중 오류 발생:', error)
-    } finally {
-      setIsAnalyzing(false)
     }
   }
 
@@ -116,7 +102,9 @@ export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
 
         {/* 내용 입력 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">오늘 하루는 어떠셨나요?</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            오늘 하루는 어떠셨나요?
+          </label>
           <textarea
             {...register('content', {
               required: '일기 내용을 입력해주세요.',
@@ -168,24 +156,11 @@ export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
                       <Tag>{analysis.name}</Tag> {analysis.reason}
                     </div>
                   ))}
-
-                  {/* <div>
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">관련 키워드:</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {analysisResult.keywords.slice(0, 8).map((keyword, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  </div> */}
                 </div>
               ) : (
                 <p className="text-sm text-blue-700">
-                  업적과 관련된 활동이 감지되지 않았습니다. 운동, 독서, 공부 등의 활동을 더 구체적으로 작성해보세요!
+                  업적과 관련된 활동이 감지되지 않았습니다. 운동, 독서, 공부 등의 활동을 더
+                  구체적으로 작성해보세요!
                 </p>
               )}
             </motion.div>
@@ -239,7 +214,10 @@ export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
           <div>
             <h4 className="font-medium text-yellow-800 mb-1">💡 업적 달성 팁</h4>
             <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• 구체적인 활동을 명시하세요 (예: &quot;30분 조깅&quot;, &quot;책 50페이지 읽음&quot;)</li>
+              <li>
+                • 구체적인 활동을 명시하세요 (예: &quot;30분 조깅&quot;, &quot;책 50페이지
+                읽음&quot;)
+              </li>
               <li>• 시간이나 양을 포함하면 더 정확하게 분석됩니다</li>
               <li>• 여러 활동을 한 경우 모두 작성해주세요</li>
             </ul>

@@ -10,7 +10,7 @@ interface AchievementListProps {
 
 type FilterType = 'all' | 'unlocked' | 'locked' | 'exercise' | 'reading' | 'lifestyle' | 'productivity' | 'health'
 
-export const AchievementList: React.FC<AchievementListProps> = ({ achievements }) => {
+export const AchievementList = ({ achievements }: AchievementListProps) => {
   const [filter, setFilter] = useState<FilterType>('all')
   const [searchTerm, setSearchTerm] = useState('')
 

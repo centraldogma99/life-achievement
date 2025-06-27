@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Trophy, BookOpen, Sparkles } from 'lucide-react'
-import type { Achievement, DiaryEntry as DiaryEntryType } from './types'
-import { DiaryEntry } from './components/DiaryEntry'
+import type { Achievement, DiaryAnalyzeResult, Diary as DiaryEntryType } from './types'
+import { WriteDiaryPage, type DiaryFormData } from './components/WriteDiaryPage'
 import { AchievementList } from './components/AchievementList'
 import { AchievementNotification } from './components/AchievementNotification'
 import {
@@ -21,7 +21,7 @@ function App() {
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntryType[]>([])
   const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<Achievement[]>([])
-
+  console.log(achievements)
   // 초기 데이터 로드
   useEffect(() => {
     const loadedAchievements = loadAchievements()
@@ -32,17 +32,22 @@ function App() {
   }, [])
 
   // 일기 저장 핸들러
-  const handleDiarySave = (newEntry: DiaryEntryType) => {
+  const handleDiarySave = (newDiary: DiaryFormData & DiaryAnalyzeResult) => {
+    const a = {
+      ...newDiary,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    }
     // 로컬 스토리지에 일기 저장
-    addDiaryEntry(newEntry)
+    addDiaryEntry(a)
 
     // 상태 업데이트
-    const updatedEntries = [newEntry, ...diaryEntries]
+    const updatedEntries = [a, ...diaryEntries]
     setDiaryEntries(updatedEntries)
 
     // 업적 진행상황 업데이트
     const oldAchievements = [...achievements]
-    const updatedAchievements = updateAchievementProgress(achievements, diaryEntries, newEntry)
+    const updatedAchievements = updateAchievementProgress(achievements, a)
 
     // 새로 달성한 업적 확인
     const newlyUnlocked = getNewlyUnlockedAchievements(oldAchievements, updatedAchievements)
@@ -59,7 +64,9 @@ function App() {
 
   // 알림 닫기 핸들러
   const handleNotificationClose = (achievementId: string) => {
-    setNewlyUnlockedAchievements(prev => prev.filter(achievement => achievement.id !== achievementId))
+    setNewlyUnlockedAchievements(prev =>
+      prev.filter(achievement => achievement.id !== achievementId),
+    )
   }
 
   const tabs = [
@@ -175,19 +182,24 @@ function App() {
         >
           {/* 탭 설명 */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{tabs.find(tab => tab.id === activeTab)?.label}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {tabs.find(tab => tab.id === activeTab)?.label}
+            </h2>
             <p className="text-gray-600">{tabs.find(tab => tab.id === activeTab)?.description}</p>
           </div>
 
           {/* 탭 콘텐츠 */}
-          {activeTab === 'diary' && <DiaryEntry onSave={handleDiarySave} />}
+          {activeTab === 'diary' && <WriteDiaryPage onSave={handleDiarySave} />}
 
           {activeTab === 'achievements' && <AchievementList achievements={achievements} />}
         </motion.div>
       </main>
 
       {/* 업적 달성 알림 */}
-      <AchievementNotification achievements={newlyUnlockedAchievements} onClose={handleNotificationClose} />
+      <AchievementNotification
+        achievements={newlyUnlockedAchievements}
+        onClose={handleNotificationClose}
+      />
 
       {/* 푸터 */}
       <footer className="bg-white/50 backdrop-blur-sm border-t border-gray-200 mt-16">

@@ -1,28 +1,43 @@
-// 업적 타입 정의
-export interface Achievement {
+export type AchievementStatus = UnlockedAchievementStatus | LockedAchievementStatus
+type BaseAchievementStatus = {
+  id: string
+  progress: number
+}
+type UnlockedAchievementStatus = {
+  isUnlocked: true
+  unlockedAt: Date
+} & BaseAchievementStatus
+type LockedAchievementStatus = {
+  isUnlocked: false
+} & BaseAchievementStatus
+
+type BaseAchievementSpec = {
   id: string
   name: string
   description: string
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
   icon: string
   category: 'exercise' | 'reading' | 'lifestyle' | 'productivity' | 'health'
-  condition: {
-    type: 'consecutive' | 'total' | 'single'
-    target: number
-    keywords: string[]
-  }
-  unlockedAt?: Date
-  isUnlocked: boolean
-  progress: number
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
 }
+type SingleAchievementSpec = {
+  type: 'single'
+  target: 1
+} & BaseAchievementSpec
+type NonSingleAchievementSpec = {
+  type: 'consecutive' | 'total'
+  target: number
+} & BaseAchievementSpec
+
+export type AchievementSpec = SingleAchievementSpec | NonSingleAchievementSpec
+
+export type Achievement = AchievementSpec & AchievementStatus
 
 // 일기 엔트리 타입
-export interface DiaryEntry {
+export interface Diary {
   id: string
   date: string
   content: string
-  extractedActions: string[]
-  achievementProgress: Record<string, number>
+  activities: DiaryAnalyzeResult['activities']
   createdAt: Date
 }
 
@@ -35,9 +50,8 @@ export interface UserProgress {
   lastEntryDate?: string
 }
 
-// LLM 응답 타입
-export interface LLMResponse {
-  achieved_list: {
+export interface DiaryAnalyzeResult {
+  activities: {
     id: string
     name: string
     reason: string

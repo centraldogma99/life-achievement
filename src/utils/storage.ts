@@ -1,11 +1,25 @@
-import type { Achievement, DiaryEntry, UserProgress } from '../types'
-import { defaultAchievements } from '../data/achievements'
+import type { Achievement, AchievementSpec, Diary, UserProgress } from '../types'
+import { achievements } from '../data/achievements'
 
 const STORAGE_KEYS = {
   ACHIEVEMENTS: 'life-achievements',
   DIARY_ENTRIES: 'diary-entries',
   USER_PROGRESS: 'user-progress',
 } as const
+
+// AchievementSpec을 Achievement로 변환
+const convertSpecToAchievement = (spec: AchievementSpec): Achievement => {
+  return {
+    ...spec,
+    progress: 0,
+    isUnlocked: false,
+  }
+}
+
+// 기본 업적들을 Achievement로 변환
+const getDefaultAchievements = (): Achievement[] => {
+  return achievements.map(convertSpecToAchievement)
+}
 
 // 업적 데이터 관리
 export const saveAchievements = (achievements: Achievement[]): void => {
@@ -16,8 +30,9 @@ export const loadAchievements = (): Achievement[] => {
   const stored = localStorage.getItem(STORAGE_KEYS.ACHIEVEMENTS)
   if (!stored) {
     // 처음 실행시 기본 업적으로 초기화
-    saveAchievements(defaultAchievements)
-    return defaultAchievements
+    const defaultAchievementsList = getDefaultAchievements()
+    saveAchievements(defaultAchievementsList)
+    return defaultAchievementsList
   }
 
   try {
@@ -26,13 +41,13 @@ export const loadAchievements = (): Achievement[] => {
     return mergeWithDefaultAchievements(parsed)
   } catch (error) {
     console.error('Failed to parse achievements from localStorage:', error)
-    return defaultAchievements
+    return getDefaultAchievements()
   }
 }
 
 // 기본 업적과 저장된 업적 병합 (새 업적 추가 대응)
 const mergeWithDefaultAchievements = (storedAchievements: Achievement[]): Achievement[] => {
-  const merged = [...defaultAchievements]
+  const merged = getDefaultAchievements()
 
   // 저장된 진행상황을 기본 업적에 적용
   storedAchievements.forEach(stored => {
@@ -46,11 +61,11 @@ const mergeWithDefaultAchievements = (storedAchievements: Achievement[]): Achiev
 }
 
 // 일기 데이터 관리
-export const saveDiaryEntries = (entries: DiaryEntry[]): void => {
+export const saveDiaryEntries = (entries: Diary[]): void => {
   localStorage.setItem(STORAGE_KEYS.DIARY_ENTRIES, JSON.stringify(entries))
 }
 
-export const loadDiaryEntries = (): DiaryEntry[] => {
+export const loadDiaryEntries = (): Diary[] => {
   const stored = localStorage.getItem(STORAGE_KEYS.DIARY_ENTRIES)
   if (!stored) return []
 
@@ -62,13 +77,13 @@ export const loadDiaryEntries = (): DiaryEntry[] => {
   }
 }
 
-export const addDiaryEntry = (entry: DiaryEntry): void => {
+export const addDiaryEntry = (entry: Diary): void => {
   const entries = loadDiaryEntries()
   const updatedEntries = [entry, ...entries]
   saveDiaryEntries(updatedEntries)
 }
 
-export const updateDiaryEntry = (updatedEntry: DiaryEntry): void => {
+export const updateDiaryEntry = (updatedEntry: Diary): void => {
   const entries = loadDiaryEntries()
   const index = entries.findIndex(entry => entry.id === updatedEntry.id)
 
@@ -93,7 +108,7 @@ export const loadUserProgress = (): UserProgress => {
   const stored = localStorage.getItem(STORAGE_KEYS.USER_PROGRESS)
   if (!stored) {
     const initialProgress: UserProgress = {
-      totalAchievements: defaultAchievements.length,
+      totalAchievements: achievements.length,
       unlockedAchievements: 0,
       currentStreak: {},
       totalEntries: 0,
@@ -107,7 +122,7 @@ export const loadUserProgress = (): UserProgress => {
   } catch (error) {
     console.error('Failed to parse user progress from localStorage:', error)
     return {
-      totalAchievements: defaultAchievements.length,
+      totalAchievements: achievements.length,
       unlockedAchievements: 0,
       currentStreak: {},
       totalEntries: 0,
@@ -115,13 +130,13 @@ export const loadUserProgress = (): UserProgress => {
   }
 }
 
-export const updateUserProgress = (achievements: Achievement[], diaryEntries: DiaryEntry[]): void => {
+export const updateUserProgress = (achievements: Achievement[], diaryEntries: Diary[]): void => {
   const unlockedCount = achievements.filter(a => a.isUnlocked).length
 
   // 카테고리별 연속 스트릭 계산
   const currentStreak: Record<string, number> = {}
   achievements.forEach(achievement => {
-    if (achievement.condition.type === 'consecutive') {
+    if (achievement.type === 'consecutive') {
       currentStreak[achievement.id] = achievement.progress
     }
   })

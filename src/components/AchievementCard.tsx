@@ -8,9 +8,9 @@ interface AchievementCardProps {
   showProgress?: boolean
 }
 
-export const AchievementCard: React.FC<AchievementCardProps> = ({ achievement, showProgress = true }) => {
+export const AchievementCard = ({ achievement, showProgress = true }: AchievementCardProps) => {
   const progressPercentage =
-    achievement.condition.target > 0 ? Math.min((achievement.progress / achievement.condition.target) * 100, 100) : 0
+    achievement.target > 0 ? Math.min((achievement.progress / achievement.target) * 100, 100) : 0
 
   const rarityIcon = {
     common: null,
@@ -88,7 +88,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({ achievement, s
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-600">진행률</span>
             <span className="text-sm font-medium text-gray-800">
-              {achievement.progress} / {achievement.condition.target}
+              {achievement.progress} / {achievement.target}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">

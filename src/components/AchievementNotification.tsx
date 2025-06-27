@@ -8,7 +8,7 @@ interface AchievementNotificationProps {
   onClose: (achievementId: string) => void
 }
 
-export const AchievementNotification: React.FC<AchievementNotificationProps> = ({ achievements, onClose }) => {
+export const AchievementNotification = ({ achievements, onClose }: AchievementNotificationProps) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -159,7 +159,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
               </div>
 
               {/* 달성 일시 */}
-              {currentAchievement.unlockedAt && (
+              {currentAchievement.isUnlocked && currentAchievement.unlockedAt && (
                 <div className={`text-xs ${config.accentColor} pt-2 border-t border-current/20`}>
                   달성 시간: {new Date(currentAchievement.unlockedAt).toLocaleString('ko-KR')}
                 </div>
