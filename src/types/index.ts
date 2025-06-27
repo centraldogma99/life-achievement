@@ -37,7 +37,9 @@ export interface UserProgress {
 
 // LLM 응답 타입
 export interface LLMResponse {
-  actions: string[]
-  keywords: string[]
-  confidence: number
+  achieved_list: {
+    id: string
+    name: string
+    reason: string
+  }[]
 }

@@ -24,7 +24,7 @@ export const dailyAchievements = [
   {
     id: 'new_knowledge',
     name: '새로운 지식',
-    description: '새로운 지식이나 정보를 얻었다는 내용이 포함되어 있다.',
+    description: '기존에 알지 못했던 새로운 지식이나 정보를 얻었다는 내용이 포함되어 있다.',
   },
   {
     id: 'cleaner',

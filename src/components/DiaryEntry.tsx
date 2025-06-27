@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Calendar, Save, Sparkles, Loader, CheckCircle, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
-import type { DiaryEntry as DiaryEntryType } from '../types'
-import { analyzeJournalEntry } from '../utils/llm'
+import type { DiaryEntry as DiaryEntryType, LLMResponse } from '../types'
+import { analyzeWithOpenAI } from '../utils/llm'
 
 interface DiaryEntryProps {
   onSave: (entry: DiaryEntryType) => void
@@ -15,12 +15,9 @@ interface DiaryFormData {
   date: string
 }
 
-export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
+export const DiaryEntry = ({ onSave }: DiaryEntryProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<{
-    actions: string[]
-    keywords: string[]
-  } | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<LLMResponse['achieved_list'] | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
 
   const {
@@ -45,19 +42,16 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
 
     try {
       // LLM을 통한 내용 분석
-      const analysis = await analyzeJournalEntry(data.content)
+      const analysis = await analyzeWithOpenAI(data.content)
 
-      setAnalysisResult({
-        actions: analysis.actions,
-        keywords: analysis.keywords,
-      })
+      setAnalysisResult(analysis.achieved_list)
 
       // 일기 엔트리 생성
       const entry: DiaryEntryType = {
         id: Date.now().toString(),
         date: data.date,
         content: data.content,
-        extractedActions: analysis.actions,
+        extractedActions: analysis.achieved_list.map(item => item.name),
         achievementProgress: {},
         createdAt: new Date(),
       }
@@ -87,11 +81,8 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
 
     setIsAnalyzing(true)
     try {
-      const analysis = await analyzeJournalEntry(content)
-      setAnalysisResult({
-        actions: analysis.actions,
-        keywords: analysis.keywords,
-      })
+      const analysis = await analyzeWithOpenAI(content)
+      setAnalysisResult(analysis.achieved_list)
     } catch (error) {
       console.error('미리보기 분석 중 오류 발생:', error)
     } finally {
@@ -170,37 +161,27 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
                 <h3 className="font-medium text-blue-900">AI 분석 결과</h3>
               </div>
 
-              {analysisResult.actions.length > 0 ? (
+              {analysisResult.length > 0 ? (
                 <div className="space-y-3">
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">감지된 활동:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {analysisResult.actions.map((action, index) => (
+                  {analysisResult.map((analysis, index) => (
+                    <div className="flex flex-wrap gap-2" key={index}>
+                      <Tag>{analysis.name}</Tag> {analysis.reason}
+                    </div>
+                  ))}
+
+                  {/* <div>
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">관련 키워드:</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {analysisResult.keywords.slice(0, 8).map((keyword, index) => (
                         <span
                           key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
                         >
-                          {action}
+                          {keyword}
                         </span>
                       ))}
                     </div>
-                  </div>
-
-                  {analysisResult.keywords.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">관련 키워드:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {analysisResult.keywords.slice(0, 8).map((keyword, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div> */}
                 </div>
               ) : (
                 <p className="text-sm text-blue-700">
@@ -258,7 +239,7 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
           <div>
             <h4 className="font-medium text-yellow-800 mb-1">💡 업적 달성 팁</h4>
             <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• 구체적인 활동을 명시하세요 (예: "30분 조깅", "책 50페이지 읽음")</li>
+              <li>• 구체적인 활동을 명시하세요 (예: &quot;30분 조깅&quot;, &quot;책 50페이지 읽음&quot;)</li>
               <li>• 시간이나 양을 포함하면 더 정확하게 분석됩니다</li>
               <li>• 여러 활동을 한 경우 모두 작성해주세요</li>
             </ul>
@@ -266,5 +247,16 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ onSave }) => {
         </div>
       </div>
     </div>
+  )
+}
+
+const Tag = ({ children, ...props }: ComponentProps<'span'>) => {
+  return (
+    <span
+      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+      {...props}
+    >
+      {children}
+    </span>
   )
 }
