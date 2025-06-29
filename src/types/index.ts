@@ -50,10 +50,12 @@ export interface UserProgress {
   lastEntryDate?: string
 }
 
+export interface Activity {
+  id: string
+  name: string
+  reason: string
+}
+
 export interface DiaryAnalyzeResult {
-  activities: {
-    id: string
-    name: string
-    reason: string
-  }[]
+  activities: Activity[]
 }

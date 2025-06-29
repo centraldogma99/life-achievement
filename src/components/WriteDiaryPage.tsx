@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Calendar, Save, Sparkles, Loader, CheckCircle, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
-import type { DiaryAnalyzeResult } from '../types'
+import type { Activity, DiaryAnalyzeResult } from '../types'
 import { useAnalyzeWithAI } from '../utils/llm'
 
 export interface DiaryFormData {
@@ -18,11 +18,8 @@ export const WriteDiaryPage = ({
 }) => {
   const { isAnalyzing, analyze } = useAnalyzeWithAI()
   const [showSuccess, setShowSuccess] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<DiaryAnalyzeResult['activities'] | null>(
-    null,
-  )
-
-  // TODO 변경사항 없다면 analyze 하지 않도록 수정
+  const [hasContentChangedAfterAnalyze, setHasContentChangedAfterAnalyze] = useState(false)
+  const [lastAnalysisResult, setLastAnalysisResult] = useState<Activity[] | null>(null)
 
   const {
     register,
@@ -39,17 +36,30 @@ export const WriteDiaryPage = ({
 
   const content = watch('content')
 
+  const analyzeDiary = async (text: string) => {
+    const analysis = await analyze(text)
+    setHasContentChangedAfterAnalyze(false)
+
+    return analysis
+  }
+
   const onSubmit = async (data: DiaryFormData) => {
     if (!data.content.trim()) return
 
     try {
-      // LLM을 통한 내용 분석
-      const analysis = await analyze(data.content)
+      if (hasContentChangedAfterAnalyze) {
+        const analysis = await analyzeDiary(data.content)
 
-      onSave({
-        ...data,
-        activities: analysis.activities,
-      })
+        onSave({
+          ...data,
+          activities: analysis.activities,
+        })
+      } else {
+        onSave({
+          ...data,
+          activities: lastAnalysisResult || [],
+        })
+      }
 
       setShowSuccess(true)
       setTimeout(() => {
@@ -58,7 +68,7 @@ export const WriteDiaryPage = ({
           date: format(new Date(), 'yyyy-MM-dd'),
           content: '',
         })
-        setAnalysisResult(null)
+        setLastAnalysisResult(null)
       }, 2000)
     } catch (error) {
       console.error('일기 분석 중 오류 발생:', error)
@@ -70,7 +80,8 @@ export const WriteDiaryPage = ({
 
     try {
       const analysis = await analyze(content)
-      setAnalysisResult(analysis.activities)
+      setHasContentChangedAfterAnalyze(false)
+      setLastAnalysisResult(analysis.activities)
     } catch (error) {
       console.error('미리보기 분석 중 오류 발생:', error)
     }
@@ -109,6 +120,9 @@ export const WriteDiaryPage = ({
             {...register('content', {
               required: '일기 내용을 입력해주세요.',
               minLength: { value: 10, message: '10자 이상 입력해주세요.' },
+              onChange: () => {
+                setHasContentChangedAfterAnalyze(true)
+              },
             })}
             rows={8}
             placeholder="오늘 한 일, 느낀 점, 운동, 독서, 공부 등 무엇이든 자유롭게 적어보세요...&#10;&#10;예시:&#10;- 오늘 아침 7시에 일어나서 30분 동안 조깅을 했다.&#10;- 점심 후에 자기계발서를 1시간 정도 읽었다.&#10;- 저녁에는 친구와 함께 헬스장에서 운동했다.&#10;- 물을 2리터 이상 마셨고, 일찍 잠자리에 들 예정이다."
@@ -137,7 +151,7 @@ export const WriteDiaryPage = ({
 
         {/* 분석 결과 미리보기 */}
         <AnimatePresence>
-          {analysisResult && (
+          {lastAnalysisResult && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -149,9 +163,9 @@ export const WriteDiaryPage = ({
                 <h3 className="font-medium text-blue-900">AI 분석 결과</h3>
               </div>
 
-              {analysisResult.length > 0 ? (
+              {lastAnalysisResult.length > 0 ? (
                 <div className="space-y-3">
-                  {analysisResult.map((analysis, index) => (
+                  {lastAnalysisResult.map((analysis, index) => (
                     <div className="flex flex-wrap gap-2" key={index}>
                       <Tag>{analysis.name}</Tag> {analysis.reason}
                     </div>
@@ -198,7 +212,7 @@ export const WriteDiaryPage = ({
             type="button"
             onClick={() => {
               reset()
-              setAnalysisResult(null)
+              setLastAnalysisResult(null)
             }}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
           >
