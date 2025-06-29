@@ -16,12 +16,27 @@ import { updateAchievementProgress, getNewlyUnlockedAchievements } from './utils
 
 type TabType = 'diary' | 'achievements'
 
+const TABS = [
+  {
+    id: 'diary' as const,
+    label: '일기 작성',
+    icon: BookOpen,
+    description: '오늘 하루를 기록하고 업적을 달성해보세요',
+  },
+  {
+    id: 'achievements' as const,
+    label: '업적 현황',
+    icon: Trophy,
+    description: '달성한 업적들을 확인하고 진행상황을 살펴보세요',
+  },
+] as const
+
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('diary')
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntryType[]>([])
   const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<Achievement[]>([])
-  console.log(achievements)
+
   // 초기 데이터 로드
   useEffect(() => {
     const loadedAchievements = loadAchievements()
@@ -33,24 +48,22 @@ function App() {
 
   // 일기 저장 핸들러
   const handleDiarySave = (newDiary: DiaryFormData & DiaryAnalyzeResult) => {
-    const a = {
+    const newDiaryEntry = {
       ...newDiary,
       id: Date.now().toString(),
       createdAt: new Date(),
     }
     // 로컬 스토리지에 일기 저장
-    addDiaryEntry(a)
+    addDiaryEntry(newDiaryEntry)
 
     // 상태 업데이트
-    const updatedEntries = [a, ...diaryEntries]
+    const updatedEntries = [newDiaryEntry, ...diaryEntries]
     setDiaryEntries(updatedEntries)
 
-    // 업적 진행상황 업데이트
-    const oldAchievements = [...achievements]
-    const updatedAchievements = updateAchievementProgress(achievements, a)
+    const updatedAchievements = updateAchievementProgress(achievements, newDiaryEntry)
 
     // 새로 달성한 업적 확인
-    const newlyUnlocked = getNewlyUnlockedAchievements(oldAchievements, updatedAchievements)
+    const newlyUnlocked = getNewlyUnlockedAchievements(achievements, updatedAchievements)
 
     if (newlyUnlocked.length > 0) {
       setNewlyUnlockedAchievements(newlyUnlocked)
@@ -68,21 +81,6 @@ function App() {
       prev.filter(achievement => achievement.id !== achievementId),
     )
   }
-
-  const tabs = [
-    {
-      id: 'diary' as const,
-      label: '일기 작성',
-      icon: BookOpen,
-      description: '오늘 하루를 기록하고 업적을 달성해보세요',
-    },
-    {
-      id: 'achievements' as const,
-      label: '업적 현황',
-      icon: Trophy,
-      description: '달성한 업적들을 확인하고 진행상황을 살펴보세요',
-    },
-  ]
 
   const stats = {
     totalAchievements: achievements.length,
@@ -134,7 +132,7 @@ function App() {
       <nav className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            {tabs.map(tab => {
+            {TABS.map(tab => {
               const Icon = tab.icon
               return (
                 <button
@@ -183,9 +181,9 @@ function App() {
           {/* 탭 설명 */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {tabs.find(tab => tab.id === activeTab)?.label}
+              {TABS.find(tab => tab.id === activeTab)?.label}
             </h2>
-            <p className="text-gray-600">{tabs.find(tab => tab.id === activeTab)?.description}</p>
+            <p className="text-gray-600">{TABS.find(tab => tab.id === activeTab)?.description}</p>
           </div>
 
           {/* 탭 콘텐츠 */}

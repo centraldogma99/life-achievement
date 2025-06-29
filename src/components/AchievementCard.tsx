@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Lock, Trophy, Star } from 'lucide-react'
 import type { Achievement } from '../types'
-import { getCategoryColor, getRarityColor, getRarityGradient } from '../utils/achievements'
+import { categoryColors, rarityColors, rarityGradients } from '../utils/achievements'
 
 interface AchievementCardProps {
   achievement: Achievement
@@ -27,8 +27,8 @@ export const AchievementCard = ({ achievement, showProgress = true }: Achievemen
       className={`
         relative rounded-xl p-6 border-2 transition-all duration-300
         ${achievement.isUnlocked ? 'shadow-lg' : 'opacity-75'}
-        ${getRarityColor(achievement.rarity)}
-        bg-gradient-to-br ${getRarityGradient(achievement.rarity)}
+        ${rarityColors[achievement.rarity]}
+        bg-gradient-to-br ${rarityGradients[achievement.rarity]}
       `}
     >
       {/* 희귀도 표시 */}
@@ -56,7 +56,7 @@ export const AchievementCard = ({ achievement, showProgress = true }: Achievemen
         <div
           className={`
           relative w-12 h-12 rounded-full flex items-center justify-center text-white text-xl
-          ${getCategoryColor(achievement.category)}
+          ${categoryColors[achievement.category]}
         `}
         >
           {achievement.isUnlocked ? <span>{achievement.icon}</span> : <Lock className="w-6 h-6" />}
@@ -73,7 +73,9 @@ export const AchievementCard = ({ achievement, showProgress = true }: Achievemen
         </div>
 
         <div className="flex-1">
-          <h3 className={`font-bold text-lg mb-1 ${achievement.isUnlocked ? 'text-gray-900' : 'text-gray-600'}`}>
+          <h3
+            className={`font-bold text-lg mb-1 ${achievement.isUnlocked ? 'text-gray-900' : 'text-gray-600'}`}
+          >
             {achievement.name}
           </h3>
           <p className={`text-sm ${achievement.isUnlocked ? 'text-gray-700' : 'text-gray-500'}`}>
@@ -96,7 +98,7 @@ export const AchievementCard = ({ achievement, showProgress = true }: Achievemen
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className={`h-2 rounded-full ${getCategoryColor(achievement.category)}`}
+              className={`h-2 rounded-full ${categoryColors[achievement.category]}`}
             />
           </div>
         </div>
@@ -114,7 +116,7 @@ export const AchievementCard = ({ achievement, showProgress = true }: Achievemen
         <span
           className={`
           inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white
-          ${getCategoryColor(achievement.category)}
+          ${categoryColors[achievement.category]}
         `}
         >
           {achievement.category === 'exercise' && '운동'}

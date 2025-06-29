@@ -1,5 +1,5 @@
 import type { Achievement, Diary } from '../types'
-import { achievementsAndActivitiesMap } from '../data/asdf'
+import { achievementsAndActivitiesMap } from '../data/achievementsAndActivitiesMap'
 
 export const updateAchievementProgress = (
   achievements: Achievement[],
@@ -39,38 +39,29 @@ export const updateAchievementProgress = (
 }
 
 // 업적 카테고리별 색상 매핑
-export const getCategoryColor = (category: Achievement['category']): string => {
-  const colors = {
-    exercise: 'bg-red-500',
-    reading: 'bg-blue-500',
-    lifestyle: 'bg-green-500',
-    productivity: 'bg-purple-500',
-    health: 'bg-pink-500',
-  }
-  return colors[category]
-}
+export const categoryColors = {
+  exercise: 'bg-red-500',
+  reading: 'bg-blue-500',
+  lifestyle: 'bg-green-500',
+  productivity: 'bg-purple-500',
+  health: 'bg-pink-500',
+} as const
 
 // 업적 희귀도별 색상 매핑
-export const getRarityColor = (rarity: Achievement['rarity']): string => {
-  const colors = {
-    common: 'border-gray-400',
-    rare: 'border-blue-400',
-    epic: 'border-purple-400',
-    legendary: 'border-yellow-400',
-  }
-  return colors[rarity]
-}
+export const rarityColors = {
+  common: 'border-gray-400',
+  rare: 'border-blue-400',
+  epic: 'border-purple-400',
+  legendary: 'border-yellow-400',
+} as const
 
 // 업적 희귀도별 배경 그라디언트
-export const getRarityGradient = (rarity: Achievement['rarity']): string => {
-  const gradients = {
-    common: 'from-gray-50 to-gray-100',
-    rare: 'from-blue-50 to-blue-100',
-    epic: 'from-purple-50 to-purple-100',
-    legendary: 'from-yellow-50 to-yellow-100',
-  }
-  return gradients[rarity]
-}
+export const rarityGradients = {
+  common: 'from-gray-50 to-gray-100',
+  rare: 'from-blue-50 to-blue-100',
+  epic: 'from-purple-50 to-purple-100',
+  legendary: 'from-yellow-50 to-yellow-100',
+} as const
 
 // 새로 달성한 업적 찾기
 export const getNewlyUnlockedAchievements = (

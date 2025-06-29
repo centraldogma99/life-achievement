@@ -3,7 +3,6 @@ import type { DiaryAnalyzeResult } from '../types'
 import { systemPromptTemplate } from '../data/systemPromptTemplate'
 import { useState } from 'react'
 
-// OpenAI API를 사용하는 실제 함수 (환경변수 설정 필요)
 export const analyzeWithAI = async (content: string): Promise<DiaryAnalyzeResult> => {
   const ai = new GoogleGenAI({
     apiKey: import.meta.env.VITE_GEMINI_API_KEY,
@@ -16,6 +15,7 @@ export const analyzeWithAI = async (content: string): Promise<DiaryAnalyzeResult
   return JSON.parse(response.text || '{}')
 }
 
+// 로딩 상태를 포함하여 analyze할 수 있도록 하는 헬퍼 커스텀 훅
 export const useAnalyzeWithAI = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
